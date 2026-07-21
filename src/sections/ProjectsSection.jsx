@@ -167,28 +167,38 @@ function PortraitVideoCard({ url, onClick }) {
     const video = videoRef.current;
     if (!video) return;
 
-    // Enforce WebKit mobile autoplay requirements
+    // Enforce WebKit & Mobile browser autoplay requirements
     video.muted = true;
     video.defaultMuted = true;
-    video.setAttribute('playsinline', '');
-    video.setAttribute('webkit-playsinline', '');
+    video.setAttribute('playsinline', 'true');
+    video.setAttribute('webkit-playsinline', 'true');
+    video.setAttribute('x5-playsinline', 'true');
+
+    const safePlay = () => {
+      if (!video) return;
+      const promise = video.play();
+      if (promise !== undefined) {
+        promise.catch(() => {});
+      }
+    };
 
     if (isMobile) {
+      safePlay();
       const observer = new IntersectionObserver(
         ([entry]) => {
           if (entry.isIntersecting) {
-            video.play().catch(() => {});
+            safePlay();
           } else {
             video.pause();
           }
         },
-        { rootMargin: '100px', threshold: 0.05 }
+        { rootMargin: '200px', threshold: 0.01 }
       );
       observer.observe(video);
       return () => observer.disconnect();
     } else {
       if (isHovered) {
-        video.play().catch(() => {});
+        safePlay();
       } else {
         video.pause();
         video.currentTime = 0;
@@ -206,7 +216,8 @@ function PortraitVideoCard({ url, onClick }) {
       <video
         ref={videoRef}
         src={url}
-        preload="metadata"
+        autoPlay={isMobile}
+        preload="auto"
         loop
         muted
         playsInline

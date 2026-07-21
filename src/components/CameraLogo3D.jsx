@@ -6,12 +6,10 @@ let cachedProcessedSrc = null;
 /* ─────────────────────────────────────────────
    CameraLogo3D
    • Automatically strips out solid black backgrounds on load (cached)
-   • Mouse-tracking parallax tilt (card 3-D feel)
+   • Mouse-tracking parallax tilt on Desktop (card 3-D feel)
+   • Non-interactive on Mobile (pulse animation only)
    • Viewport-aware RAF animation loops (stops when scrolled out)
-   • Floating idle animation
-   • Rotating lens rings on hover
-   • Click → shutter flash + aperture snap
-   • Ambient glow, lens-flare shimmer (canvas)
+   • Ambient glow pulse bloom animation
 ───────────────────────────────────────────── */
 export default function CameraLogo3D({ size = 520 }) {
   const containerRef = useRef(null);
@@ -24,9 +22,20 @@ export default function CameraLogo3D({ size = 520 }) {
   const [lensAngle, setLensAngle] = useState(0);
   const [shutterOpen, setShutterOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
   
   // Start with cached or original src
   const [processedSrc, setProcessedSrc] = useState(cachedProcessedSrc || logoSrc);
+
+  /* ── Mobile viewport detection ── */
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   /* ── Viewport visibility tracking ── */
   useEffect(() => {
@@ -135,8 +144,9 @@ export default function CameraLogo3D({ size = 520 }) {
     };
   }, []);
 
-  /* ── Mouse parallax ── */
+  /* ── Mouse parallax (Desktop only) ── */
   const handleMouseMove = useCallback((e) => {
+    if (isMobile) return;
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
     const cx = rect.left + rect.width  / 2;
@@ -145,11 +155,17 @@ export default function CameraLogo3D({ size = 520 }) {
       x: (e.clientX - cx) / (rect.width  / 2),
       y: (e.clientY - cy) / (rect.height / 2),
     };
-  }, []);
+  }, [isMobile]);
 
   /* ── Viewport-aware smooth tilt interpolation loop ── */
   useEffect(() => {
-    if (!isVisible) return;
+    if (!isVisible || isMobile) {
+      if (containerRef.current) {
+        containerRef.current.style.setProperty('--rx', '0deg');
+        containerRef.current.style.setProperty('--ry', '0deg');
+      }
+      return;
+    }
 
     const MAX_TILT = 24;
     const animate = () => {
@@ -168,19 +184,20 @@ export default function CameraLogo3D({ size = 520 }) {
       cancelAnimationFrame(rafRef.current);
       window.removeEventListener('mousemove', handleMouseMove);
     };
-  }, [handleMouseMove, isVisible]);
+  }, [handleMouseMove, isVisible, isMobile]);
 
-  /* ── Lens ring spin on hover ── */
+  /* ── Lens ring spin on hover (Desktop only) ── */
   useEffect(() => {
     let interval;
-    if (hovered && isVisible) {
+    if (hovered && isVisible && !isMobile) {
       interval = setInterval(() => setLensAngle(a => a + 1.5), 16);
     }
     return () => clearInterval(interval);
-  }, [hovered, isVisible]);
+  }, [hovered, isVisible, isMobile]);
 
-  /* ── Shutter click ── */
+  /* ── Shutter click (Desktop only) ── */
   const handleClick = () => {
+    if (isMobile) return;
     setShutterOpen(true);
     setTimeout(() => setShutterOpen(false), 130);
   };
@@ -264,7 +281,6 @@ export default function CameraLogo3D({ size = 520 }) {
     shimmerRaf = requestAnimationFrame(draw);
     return () => cancelAnimationFrame(shimmerRaf);
   }, [isVisible]);
-
 
   const s = size;
 
@@ -388,21 +404,19 @@ export default function CameraLogo3D({ size = 520 }) {
           maxWidth: s,
           aspectRatio: '1 / 1',
           perspective: '1000px',
-          cursor: 'pointer',
+          cursor: isMobile ? 'default' : 'pointer',
           userSelect: 'none',
+          pointerEvents: isMobile ? 'none' : 'auto',
         }}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => { setHovered(false); mouseRef.current = { x: 0, y: 0 }; }}
+        onMouseEnter={() => { if (!isMobile) setHovered(true); }}
+        onMouseLeave={() => { if (!isMobile) { setHovered(false); mouseRef.current = { x: 0, y: 0 }; } }}
         onClick={handleClick}
         role="img"
-        aria-label="Interactive 3D Camera Logo"
+        aria-label="3D Camera Logo"
       >
-        {/* Ambient glow bloom */}
         <div className="cam3d-glow-ring" />
 
-        {/* 3D tilting card */}
         <div className="cam3d-card">
-          {/* Camera PNG - Swapped automatically to processed transparent version */}
           <img
             src={processedSrc}
             alt="Camera Logo"
@@ -410,10 +424,8 @@ export default function CameraLogo3D({ size = 520 }) {
             draggable={false}
           />
 
-          {/* Canvas lens shimmer overlay */}
           <canvas ref={canvasRef} className="cam3d-canvas" width={260} height={260} />
 
-          {/* Outer spinning lens ring */}
           <div
             className="cam3d-ring"
             style={{
@@ -421,10 +433,9 @@ export default function CameraLogo3D({ size = 520 }) {
               borderTopColor:  'rgba(180,215,255,0.65)',
               borderLeftColor: 'rgba(180,215,255,0.25)',
               transform: `rotate(${lensAngle}deg)`,
-              opacity: hovered ? 1 : 0.35,
+              opacity: hovered && !isMobile ? 1 : 0.35,
             }}
           />
-          {/* Inner counter-spinning ring */}
           <div
             className="cam3d-ring"
             style={{
@@ -432,12 +443,11 @@ export default function CameraLogo3D({ size = 520 }) {
               borderBottomColor: 'rgba(241, 115, 106, 0.6)',
               borderRightColor:  'rgba(230,245,255,0.25)',
               transform: `rotate(${-lensAngle * 1.5}deg)`,
-              opacity: hovered ? 1 : 0.22,
+              opacity: hovered && !isMobile ? 1 : 0.22,
             }}
           />
 
-          {/* Floating spark particles */}
-          {SPARKS.map((sp, i) => (
+          {!isMobile && SPARKS.map((sp, i) => (
             <div
               key={i}
               className="cam3d-spark"
@@ -451,14 +461,14 @@ export default function CameraLogo3D({ size = 520 }) {
             />
           ))}
 
-          {/* Shutter flash */}
-          {shutterOpen && <div className="cam3d-flash" key={Date.now()} />}
+          {shutterOpen && !isMobile && <div className="cam3d-flash" key={Date.now()} />}
         </div>
 
-        {/* Hover hint */}
-        <div className="cam3d-hint" style={{ opacity: hovered ? 1 : 0 }}>
-          click to shoot ✦
-        </div>
+        {!isMobile && (
+          <div className="cam3d-hint" style={{ opacity: hovered ? 1 : 0 }}>
+            click to shoot ✦
+          </div>
+        )}
       </div>
     </>
   );

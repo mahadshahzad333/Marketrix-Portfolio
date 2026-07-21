@@ -47,7 +47,7 @@ const MARQUEE_ITEMS = [
 const ROW1 = MARQUEE_ITEMS.slice(0, 7);
 const ROW2 = MARQUEE_ITEMS.slice(7);
 
-// ─── WebKit Mobile Autoplay & Viewport Managed Video Item ───
+// ─── WebKit & Mobile Robust Autoplay Managed Video Item ───
 function MarqueeVideoItem({ item, className }) {
   const videoRef = useRef(null);
 
@@ -55,30 +55,50 @@ function MarqueeVideoItem({ item, className }) {
     const video = videoRef.current;
     if (!video) return;
 
-    // Mobile Safari & WebKit autoplay compliance
+    // Strict WebKit & mobile browser autoplay compliance
     video.muted = true;
     video.defaultMuted = true;
-    video.setAttribute('playsinline', '');
-    video.setAttribute('webkit-playsinline', '');
+    video.setAttribute('playsinline', 'true');
+    video.setAttribute('webkit-playsinline', 'true');
+    video.setAttribute('x5-playsinline', 'true');
+
+    const safePlay = () => {
+      if (!video) return;
+      const promise = video.play();
+      if (promise !== undefined) {
+        promise.catch(() => {
+          // Retry on metadata ready or user interaction fallback
+        });
+      }
+    };
+
+    // Pre-trigger play on mount
+    safePlay();
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          const playPromise = video.play();
-          if (playPromise !== undefined) {
-            playPromise.catch(() => {
-              // Fallback silently if browser policies restrict auto-play
-            });
-          }
+          safePlay();
         } else {
           video.pause();
         }
       },
-      { rootMargin: '50px', threshold: 0.1 }
+      { rootMargin: '300px', threshold: 0.01 }
     );
 
     observer.observe(video);
-    return () => observer.disconnect();
+
+    // Mobile touch interaction fallback listener to unblock restricted video autoplay
+    const handleTouch = () => {
+      safePlay();
+      window.removeEventListener('touchstart', handleTouch);
+    };
+    window.addEventListener('touchstart', handleTouch, { passive: true, once: true });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('touchstart', handleTouch);
+    };
   }, [item]);
 
   return (
@@ -90,7 +110,7 @@ function MarqueeVideoItem({ item, className }) {
       muted
       loop
       playsInline
-      preload="metadata"
+      preload="auto"
       className={className}
     />
   );
