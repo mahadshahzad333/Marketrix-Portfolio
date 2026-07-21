@@ -209,10 +209,10 @@ export default function CameraLogo3D({ size = 520 }) {
 
       /* inner lens tint */
       const inner = ctx.createRadialGradient(cx - r * 0.25, cy - r * 0.25, 0, cx, cy, r);
-      inner.addColorStop(0,   'rgba(200,220,255,0.28)');
-      inner.addColorStop(0.4, 'rgba(120,150,240,0.15)');
-      inner.addColorStop(0.8, 'rgba(60,90,200,0.12)');
-      inner.addColorStop(1,   'rgba(10,30,160,0.25)');
+      inner.addColorStop(0,   'rgba(255,200,200,0.28)');
+      inner.addColorStop(0.4, 'rgba(240,120,120,0.15)');
+      inner.addColorStop(0.8, 'rgba(200,60,60,0.12)');
+      inner.addColorStop(1,   'rgba(160,10,10,0.25)');
       ctx.save();
       ctx.beginPath();
       ctx.arc(cx, cy, r, 0, Math.PI * 2);
@@ -314,8 +314,8 @@ export default function CameraLogo3D({ size = 520 }) {
           border-radius: 50%;
           background: radial-gradient(
             ellipse at 50% 55%,
-            rgba(100,150,255,0.45) 0%,
-            rgba(70,110,240,0.25) 40%,
+            rgba(239,68,68,0.45) 0%,
+            rgba(185,28,28,0.25) 40%,
             transparent 75%
           );
           filter: blur(20px);
@@ -326,15 +326,15 @@ export default function CameraLogo3D({ size = 520 }) {
           position: absolute;
           width: 4.5px; height: 4.5px;
           border-radius: 50%;
-          background: rgba(190,225,255,0.95);
+          background: rgba(254,202,202,0.95);
           animation: cam3d-spark-float linear infinite;
-          box-shadow: 0 0 8px 3px rgba(150,190,255,0.75);
+          box-shadow: 0 0 8px 3px rgba(239,68,68,0.75);
         }
         .cam3d-flash {
           position: absolute;
           inset: 8%;
           border-radius: 50%;
-          background: radial-gradient(circle, rgba(255,255,255,0.95) 0%, rgba(210,230,255,0.4) 60%, transparent 100%);
+          background: radial-gradient(circle, rgba(255,255,255,0.95) 0%, rgba(254,202,202,0.4) 60%, transparent 100%);
           z-index: 10;
           pointer-events: none;
           animation: cam3d-flash-anim 0.13s ease-out forwards;
@@ -347,7 +347,7 @@ export default function CameraLogo3D({ size = 520 }) {
           font-size: 0.7rem;
           letter-spacing: 0.22em;
           text-transform: uppercase;
-          color: rgba(160,190,255,0.7);
+          color: rgba(248,113,113,0.8);
           white-space: nowrap;
           pointer-events: none;
           transition: opacity 0.4s;

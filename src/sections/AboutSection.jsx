@@ -73,17 +73,15 @@ export default function AboutSection() {
         {/* Heading */}
         <FadeIn delay={0} y={40}>
           <h2
-            className="hero-heading font-black uppercase leading-none tracking-tight"
-            style={{ fontSize: 'clamp(3rem, 12vw, 160px)',
-              color: '#f80e0eff'
-             }}
+            className="bg-gradient-to-b from-[#f80e0e] to-[#c00000] bg-clip-text text-transparent font-black uppercase leading-none tracking-tight"
+            style={{ fontSize: 'clamp(3rem, 12vw, 160px)' }}
           >
             About us
           </h2>
         </FadeIn>
 
         {/* Animated paragraph + button */}
-        <div className="flex flex-col items-center gap-26 sm:gap-26 md:gap-24">
+        <div className="flex flex-col items-center gap-16 sm:gap-20 md:gap-24">
           <AnimatedText
             text={ABOUT_TEXT}
             className="font-medium leading-relaxed max-w-[560px] text-center"

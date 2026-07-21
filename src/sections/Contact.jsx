@@ -66,7 +66,7 @@ export default function Contact() {
       {/* ── Heading Block ── */}
       <div className="max-w-4xl mx-auto text-center mb-16 sm:mb-24 relative z-10 flex flex-col items-center w-full">
         <h2
-          className="hero-heading font-black uppercase leading-[1.1] tracking-tight text-center mb-4"
+          className="bg-gradient-to-b from-[#f80e0e] to-[#c00000] bg-clip-text text-transparent font-black uppercase leading-[1.1] tracking-tight text-center mb-4"
           style={{ fontSize: 'clamp(3rem, 10vw, 130px)' }}
         >
           Let's Talk

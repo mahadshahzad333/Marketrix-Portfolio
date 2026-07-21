@@ -114,7 +114,7 @@ function Lightbox({ mediaList, currentIndex, onClose, onPrev, onNext }) {
                 className="max-w-full max-h-[75vh] object-contain rounded-xl"
               />
               {/* Custom Video Controls inside Lightbox */}
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-4 flex gap-4 items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-4 flex gap-4 items-center justify-between opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
                 <button
                   onClick={togglePlay}
                   className="p-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white transition-colors cursor-pointer"
@@ -147,35 +147,51 @@ function Lightbox({ mediaList, currentIndex, onClose, onPrev, onNext }) {
   );
 }
 
-// ─── Play-on-Hover Portrait Video Card ───
+// ─── Play-on-Hover/Autoplay Portrait Video Card ───
 function PortraitVideoCard({ url, onClick }) {
   const videoRef = useRef(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    if (!videoRef.current) return;
-    if (isHovered) {
-      videoRef.current.play().catch(() => {});
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (isMobile) {
+      video.play().catch(() => {});
     } else {
-      videoRef.current.pause();
-      videoRef.current.currentTime = 0;
+      if (isHovered) {
+        video.play().catch(() => {});
+      } else {
+        video.pause();
+        video.currentTime = 0;
+      }
     }
-  }, [isHovered]);
+  }, [isHovered, isMobile]);
 
   return (
     <div
       className="relative aspect-[9/16] w-[210px] sm:w-[260px] md:w-[300px] flex-shrink-0 rounded-2xl overflow-hidden border border-white/10 bg-zinc-900 shadow-xl group cursor-pointer snap-start transition-all duration-300 hover:border-red-600/50 hover:shadow-red-950/20"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      onTouchStart={() => setIsHovered(!isHovered)}
       onClick={onClick}
     >
       <video
         ref={videoRef}
         src={url}
+        preload="auto"
         loop
         muted
         playsInline
+        autoPlay={isMobile}
         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-4 transition-opacity duration-300 group-hover:from-black/95">
@@ -241,7 +257,7 @@ export default function ProjectsSection() {
       {/* Absolute Overlay Left Arrow */}
       <button
         onClick={() => handleScroll(graphicsScrollRef, 'left')}
-        className="absolute left-4 top-1/2 -translate-y-1/2 p-4.5 rounded-full bg-black/75 border border-white/10 hover:border-red-600/40 hover:bg-zinc-900/95 text-white transition-all duration-300 opacity-0 group-hover/carousel:opacity-100 z-20 cursor-pointer hidden sm:flex hover:scale-110 active:scale-95 shadow-[0_8px_24px_rgba(0,0,0,0.6)] hover:shadow-[0_8px_24px_rgba(220,38,38,0.3)]"
+        className="absolute left-4 top-1/2 -translate-y-1/2 p-4 rounded-full bg-black/75 border border-white/10 hover:border-red-600/40 hover:bg-zinc-900/95 text-white transition-all duration-300 opacity-0 group-hover/carousel:opacity-100 z-20 cursor-pointer hidden sm:flex hover:scale-110 active:scale-95 shadow-[0_8px_24px_rgba(0,0,0,0.6)] hover:shadow-[0_8px_24px_rgba(220,38,38,0.3)]"
       >
         <ChevronLeft size={28} />
       </button>
@@ -249,7 +265,7 @@ export default function ProjectsSection() {
       {/* Absolute Overlay Right Arrow */}
       <button
         onClick={() => handleScroll(graphicsScrollRef, 'right')}
-        className="absolute right-4 top-1/2 -translate-y-1/2 p-4.5 rounded-full bg-black/75 border border-white/10 hover:border-red-600/40 hover:bg-zinc-900/95 text-white transition-all duration-300 opacity-0 group-hover/carousel:opacity-100 z-20 cursor-pointer hidden sm:flex hover:scale-110 active:scale-95 shadow-[0_8px_24px_rgba(0,0,0,0.6)] hover:shadow-[0_8px_24px_rgba(220,38,38,0.3)]"
+        className="absolute right-4 top-1/2 -translate-y-1/2 p-4 rounded-full bg-black/75 border border-white/10 hover:border-red-600/40 hover:bg-zinc-900/95 text-white transition-all duration-300 opacity-0 group-hover/carousel:opacity-100 z-20 cursor-pointer hidden sm:flex hover:scale-110 active:scale-95 shadow-[0_8px_24px_rgba(0,0,0,0.6)] hover:shadow-[0_8px_24px_rgba(220,38,38,0.3)]"
       >
         <ChevronRight size={28} />
       </button>
@@ -325,7 +341,7 @@ export default function ProjectsSection() {
         {/* Absolute Overlay Left Arrow */}
         <button
           onClick={() => handleScroll(videoScrollRef, 'left')}
-          className="absolute left-4 top-1/2 -translate-y-1/2 p-4.5 rounded-full bg-black/75 border border-white/10 hover:border-red-600/40 hover:bg-zinc-900/95 text-white transition-all duration-300 opacity-0 group-hover/carousel:opacity-100 z-20 cursor-pointer hidden sm:flex hover:scale-110 active:scale-95 shadow-[0_8px_24px_rgba(0,0,0,0.6)] hover:shadow-[0_8px_24px_rgba(220,38,38,0.3)]"
+          className="absolute left-4 top-1/2 -translate-y-1/2 p-4 rounded-full bg-black/75 border border-white/10 hover:border-red-600/40 hover:bg-zinc-900/95 text-white transition-all duration-300 opacity-0 group-hover/carousel:opacity-100 z-20 cursor-pointer hidden sm:flex hover:scale-110 active:scale-95 shadow-[0_8px_24px_rgba(0,0,0,0.6)] hover:shadow-[0_8px_24px_rgba(220,38,38,0.3)]"
         >
           <ChevronLeft size={28} />
         </button>
@@ -333,7 +349,7 @@ export default function ProjectsSection() {
         {/* Absolute Overlay Right Arrow */}
         <button
           onClick={() => handleScroll(videoScrollRef, 'right')}
-          className="absolute right-4 top-1/2 -translate-y-1/2 p-4.5 rounded-full bg-black/75 border border-white/10 hover:border-red-600/40 hover:bg-zinc-900/95 text-white transition-all duration-300 opacity-0 group-hover/carousel:opacity-100 z-20 cursor-pointer hidden sm:flex hover:scale-110 active:scale-95 shadow-[0_8px_24px_rgba(0,0,0,0.6)] hover:shadow-[0_8px_24px_rgba(220,38,38,0.3)]"
+          className="absolute right-4 top-1/2 -translate-y-1/2 p-4 rounded-full bg-black/75 border border-white/10 hover:border-red-600/40 hover:bg-zinc-900/95 text-white transition-all duration-300 opacity-0 group-hover/carousel:opacity-100 z-20 cursor-pointer hidden sm:flex hover:scale-110 active:scale-95 shadow-[0_8px_24px_rgba(0,0,0,0.6)] hover:shadow-[0_8px_24px_rgba(220,38,38,0.3)]"
         >
           <ChevronRight size={28} />
         </button>
@@ -365,20 +381,9 @@ export default function ProjectsSection() {
       className="rounded-t-[40px] sm:rounded-t-[50px] md:rounded-t-[60px] -mt-10 sm:-mt-12 md:-mt-14 z-40 relative px-4 sm:px-8 md:px-12 pt-20 sm:pt-24 md:pt-32 pb-28"
       style={{ background: '#0C0C0C' }}
     >
-      {/* ── Custom Global No-Scrollbar Injected Styles ── */}
-      <style>{`
-        .no-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .no-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `}</style>
-
       {/* ── Heading (Generous Bottom Spacing) ── */}
       <h2
-        className="hero-heading font-black uppercase leading-none tracking-tight text-center mb-10 sm:mb-14 md:mb-20"
+        className="bg-gradient-to-b from-[#f80e0e] to-[#c00000] bg-clip-text text-transparent font-black uppercase leading-none tracking-tight text-center mb-10 sm:mb-14 md:mb-20"
         style={{ fontSize: 'clamp(3rem, 12vw, 160px)' }}
       >
         Projects

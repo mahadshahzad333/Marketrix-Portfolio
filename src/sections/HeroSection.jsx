@@ -49,11 +49,11 @@ export default function HeroSection() {
       {/* ── Hero Heading ── */}
       <FadeIn delay={0.15} y={40} className="overflow-hidden relative z-10">
         <h1
-          className="hero-heading font-black uppercase tracking-tight leading-[0.9] text-center w-full text-[12vw] sm:text-[14vw] md:text-[15vw] lg:text-[14vw] mt-12 sm:mt-10 md:mt-2 px-4"
+          className="font-black uppercase tracking-tight leading-[0.9] text-center w-full text-[12vw] sm:text-[14vw] md:text-[15vw] lg:text-[14vw] mt-12 sm:mt-10 md:mt-2 px-4"
           style={{ display: 'block', wordBreak: 'break-word' }}
         >
-          Hi, we&apos;re
-          <span className="text-red-500 block sm:inline"> marketrix</span>
+          <span className="bg-gradient-to-b from-[#f80e0e] to-[#c00000] bg-clip-text text-transparent">Hi, we&apos;re</span>
+          <span className="text-red-600 block sm:inline"> marketrix</span>
         </h1>
       </FadeIn>
 

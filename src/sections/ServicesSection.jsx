@@ -74,7 +74,7 @@ export default function ServicesSection() {
       {/* ── Service list ── */}
       <ul className="max-w-5xl mx-auto">
         {SERVICES.map((service, i) => (
-          <FadeIn key={service.num} delay={i * 0.1} y={30}>
+          <FadeIn key={service.num} delay={Math.min(i * 0.05, 0.3)} y={30}>
             <li
               className="flex items-start gap-6 md:gap-10 py-8 sm:py-10 md:py-12"
               style={{

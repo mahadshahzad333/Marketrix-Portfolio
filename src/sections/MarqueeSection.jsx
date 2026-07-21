@@ -16,11 +16,11 @@ import vid13 from '../assets/videos/lv_0_20260621150457~2.mp4';
 
 const VIDEO_URLS = [vid1, vid2, vid3, vid4, vid5, vid6, vid7, vid8, vid9, vid10, vid11, vid12, vid13];
 
-const ROW1 = VIDEO_URLS.slice(4);
-const ROW2 = VIDEO_URLS.slice(4);
+const ROW1 = VIDEO_URLS.slice(0, 7);
+const ROW2 = VIDEO_URLS.slice(7);
 
-// Triple each row for seamless infinite visual
-const TRIPLE = (arr) => [...arr, ...arr, ...arr];
+// Double each row for seamless infinite visual
+const DOUBLE = (arr) => [...arr, ...arr];
 
 export default function MarqueeSection() {
   const sectionRef = useRef(null);
@@ -39,8 +39,8 @@ export default function MarqueeSection() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const row1Vids = TRIPLE(ROW1);
-  const row2Vids = TRIPLE(ROW2);
+  const row1Vids = DOUBLE(ROW1);
+  const row2Vids = DOUBLE(ROW2);
 
   // Clean UI styling for portrait videos
   const videoClasses = "rounded-3xl object-cover flex-shrink-0 w-[180px] h-[320px] sm:w-[220px] sm:h-[390px] md:w-[260px] md:h-[460px] shadow-2xl shadow-black/50 border border-white/5 ";
@@ -67,6 +67,7 @@ export default function MarqueeSection() {
             muted
             loop
             playsInline
+            preload="auto"
             className={videoClasses}
           >
             <source src={url} type="video/mp4" />
@@ -90,6 +91,7 @@ export default function MarqueeSection() {
             muted
             loop
             playsInline
+            preload="auto"
             className={videoClasses}
           >
             <source src={url} type="video/mp4" />

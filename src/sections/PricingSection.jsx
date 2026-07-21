@@ -72,7 +72,7 @@ export default function PricingSection() {
       {/* ── Heading ── */}
       <div className="max-w-4xl mx-auto text-center mb-20 sm:mb-32 relative z-10 flex flex-col items-center w-full">
         <h2
-          className="hero-heading font-black uppercase leading-[1.1] tracking-tight text-center mb-6"
+          className="bg-gradient-to-b from-[#f80e0e] to-[#c00000] bg-clip-text text-transparent font-black uppercase leading-[1.1] tracking-tight text-center mb-6"
           style={{ fontSize: 'clamp(3rem, 10vw, 130px)' }}
         >
           Our Packages
@@ -135,7 +135,7 @@ export default function PricingSection() {
                   </span>
                 </div>
 
-                <ul className="flex flex-col gap-5 sm:gap-6 md:gap-7 mb-6 items-center w-full">
+                <ul className="flex flex-col gap-4 sm:gap-5 md:gap-6 mb-6 items-center w-full">
                   {pkg.features.map((feature, idx) => (
                     <li
                       key={idx}
