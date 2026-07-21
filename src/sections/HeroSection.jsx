@@ -5,7 +5,7 @@ import Magnet from '../components/Magnet';
 import ContactButton from '../components/ContactButton';
 import CameraLogo3D from '../components/CameraLogo3D';
 
-const NAV_LINKS = ['About', 'Price', 'Projects', 'Contact'];
+const NAV_LINKS = ['About', 'Services', 'Pricing', 'Projects', 'Contact'];
 
 export default function HeroSection({ startAnimation }) {
   return (
