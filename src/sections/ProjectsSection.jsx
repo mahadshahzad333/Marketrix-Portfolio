@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, Volume2, VolumeX, X, ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
+import FadeIn from '../components/FadeIn';
 
 // ─── Dynamic Asset Imports ───
 const graphicsImages = Object.values(
@@ -382,34 +383,38 @@ export default function ProjectsSection() {
       style={{ background: '#0C0C0C' }}
     >
       {/* ── Heading (Generous Bottom Spacing) ── */}
-      <h2
-        className="bg-gradient-to-b from-[#f80e0e] to-[#c00000] bg-clip-text text-transparent font-black uppercase leading-none tracking-tight text-center mb-10 sm:mb-14 md:mb-20"
-        style={{ fontSize: 'clamp(3rem, 12vw, 160px)' }}
-      >
-        Projects
-      </h2>
+      <FadeIn delay={0} y={40}>
+        <h2
+          className="bg-gradient-to-b from-[#f80e0e] to-[#c00000] bg-clip-text text-transparent font-black uppercase leading-none tracking-tight text-center mb-10 sm:mb-14 md:mb-20"
+          style={{ fontSize: 'clamp(3rem, 12vw, 160px)' }}
+        >
+          Projects
+        </h2>
+      </FadeIn>
 
       {/* ── Framer Motion Sliding Tab Selector (Clear Spacing Above & Below) ── */}
-      <div className="flex justify-between gap-1 sm:gap-2 mb-12 sm:mb-16 md:mb-24 max-w-[92%] sm:max-w-lg md:max-w-2xl mx-auto p-1.5 bg-zinc-900/80 border border-white/10 rounded-full backdrop-blur-lg relative z-10 shadow-2xl">
-        {TABS.map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`relative flex-1 py-3 sm:py-3.5 md:py-4 text-[10px] sm:text-xs md:text-sm font-bold uppercase tracking-widest rounded-full transition-colors duration-200 cursor-pointer whitespace-nowrap ${
-              activeTab === tab ? 'text-white' : 'text-zinc-400 hover:text-zinc-100'
-            }`}
-          >
-            {activeTab === tab && (
-              <motion.div
-                layoutId="activeTabIndicator"
-                className="absolute inset-0 bg-red-600 rounded-full z-0"
-                transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-              />
-            )}
-            <span className="relative z-10">{tab}</span>
-          </button>
-        ))}
-      </div>
+      <FadeIn delay={0.15} y={30}>
+        <div className="flex justify-between gap-1 sm:gap-2 mb-12 sm:mb-16 md:mb-24 max-w-[92%] sm:max-w-lg md:max-w-2xl mx-auto p-1.5 bg-zinc-900/80 border border-white/10 rounded-full backdrop-blur-lg relative z-10 shadow-2xl">
+          {TABS.map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`relative flex-1 py-3 sm:py-3.5 md:py-4 text-[10px] sm:text-xs md:text-sm font-bold uppercase tracking-widest rounded-full transition-colors duration-200 cursor-pointer whitespace-nowrap ${
+                activeTab === tab ? 'text-white' : 'text-zinc-400 hover:text-zinc-100'
+              }`}
+            >
+              {activeTab === tab && (
+                <motion.div
+                  layoutId="activeTabIndicator"
+                  className="absolute inset-0 bg-red-600 rounded-full z-0"
+                  transition={{ type: 'spring', stiffness: 350, damping: 28 }}
+                />
+              )}
+              <span className="relative z-10">{tab}</span>
+            </button>
+          ))}
+        </div>
+      </FadeIn>
 
       {/* ── Active Subsection Container (Added Top Padding for Breathing Room) ── */}
       <div className="w-full relative z-10 min-h-[40vh] pt-4 sm:pt-8 md:pt-12">

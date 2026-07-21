@@ -68,7 +68,7 @@ export default function App() {
       </AnimatePresence>
 
       <div style={{ background: '#0C0C0C', overflowX: 'clip' }}>
-        <HeroSection />
+        <HeroSection startAnimation={!loading} />
         <MarqueeSection />
         <AboutSection />
         <ServicesSection />
