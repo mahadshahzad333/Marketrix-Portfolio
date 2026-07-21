@@ -88,7 +88,7 @@ export default function MarqueeSection() {
             muted
             loop
             playsInline
-            preload="auto"
+            preload="metadata"
             className={videoClasses}
           >
             <source src={url} type="video/mp4" />

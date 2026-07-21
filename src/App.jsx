@@ -21,10 +21,10 @@ export default function App() {
       setLoading(false);
     } else {
       window.addEventListener('load', handleLoad);
-      // Fallback timeout to guarantee entry if some resources are slow
+      // Instant fallback timeout to reveal site quickly
       const timer = setTimeout(() => {
         setLoading(false);
-      }, 2500);
+      }, 1000);
 
       return () => {
         window.removeEventListener('load', handleLoad);
