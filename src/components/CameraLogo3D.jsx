@@ -1,10 +1,13 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import logoSrc from '../assets/images/camera3d.png';
 
+let cachedProcessedSrc = null;
+
 /* ─────────────────────────────────────────────
    CameraLogo3D
-   • Automatically strips out solid black backgrounds on load
+   • Automatically strips out solid black backgrounds on load (cached)
    • Mouse-tracking parallax tilt (card 3-D feel)
+   • Viewport-aware RAF animation loops (stops when scrolled out)
    • Floating idle animation
    • Rotating lens rings on hover
    • Click → shutter flash + aperture snap
@@ -20,15 +23,37 @@ export default function CameraLogo3D({ size = 520 }) {
   const [hovered, setHovered] = useState(false);
   const [lensAngle, setLensAngle] = useState(0);
   const [shutterOpen, setShutterOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   
-  // Start with original src as fallback, swap to transparent version once processed
-  const [processedSrc, setProcessedSrc] = useState(logoSrc);
+  // Start with cached or original src
+  const [processedSrc, setProcessedSrc] = useState(cachedProcessedSrc || logoSrc);
 
-  /* ── Programmatically strip the black background ── */
+  /* ── Viewport visibility tracking ── */
   useEffect(() => {
+    const node = containerRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      { threshold: 0.05 }
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  /* ── Programmatically strip the black background (with module caching) ── */
+  useEffect(() => {
+    if (cachedProcessedSrc) {
+      setProcessedSrc(cachedProcessedSrc);
+      return;
+    }
+
     const img = new Image();
     img.src = logoSrc;
-    img.crossOrigin = 'anonymous'; // Prevent CORS issues if hosted remotely
+    img.crossOrigin = 'anonymous';
     
     img.onload = () => {
       const canvas = document.createElement('canvas');
@@ -42,11 +67,8 @@ export default function CameraLogo3D({ size = 520 }) {
       const w = canvas.width;
       const h = canvas.height;
 
-      // Queue for Breadth-First-Search (BFS) flood fill
       const queue = [];
       const visited = new Uint8Array(w * h);
-      
-      // Threshold for what is considered background "black" (0-255 scale)
       const threshold = 35; 
 
       const getIndex = (x, y) => (y * w + x) * 4;
@@ -70,7 +92,6 @@ export default function CameraLogo3D({ size = 520 }) {
         }
       };
 
-      // Add border edges as initial seeds to make sure we clean all black borders
       for (let x = 0; x < w; x++) {
         addSeed(x, 0);
         addSeed(x, h - 1);
@@ -80,18 +101,15 @@ export default function CameraLogo3D({ size = 520 }) {
         addSeed(w - 1, y);
       }
 
-      // Execute flood fill to turn the outer black frame transparent
       let head = 0;
       while (head < queue.length) {
         const pos = queue[head++];
         const y = Math.floor(pos / w);
         const x = pos % w;
 
-        // Turn this background pixel transparent
         const idx = pos * 4;
-        data[idx + 3] = 0; // Set Alpha channel to 0
+        data[idx + 3] = 0;
 
-        // Check 4-way neighbors
         const neighbors = [
           { nx: x + 1, ny: y },
           { nx: x - 1, ny: y },
@@ -110,9 +128,10 @@ export default function CameraLogo3D({ size = 520 }) {
         }
       }
 
-      // Write transparent image data back to canvas and set as source
       ctx.putImageData(imgData, 0, 0);
-      setProcessedSrc(canvas.toDataURL('image/png'));
+      const url = canvas.toDataURL('image/png');
+      cachedProcessedSrc = url;
+      setProcessedSrc(url);
     };
   }, []);
 
@@ -128,8 +147,10 @@ export default function CameraLogo3D({ size = 520 }) {
     };
   }, []);
 
-  /* ── Smooth tilt interpolation loop ── */
+  /* ── Viewport-aware smooth tilt interpolation loop ── */
   useEffect(() => {
+    if (!isVisible) return;
+
     const MAX_TILT = 24;
     const animate = () => {
       const target = mouseRef.current;
@@ -147,16 +168,16 @@ export default function CameraLogo3D({ size = 520 }) {
       cancelAnimationFrame(rafRef.current);
       window.removeEventListener('mousemove', handleMouseMove);
     };
-  }, [handleMouseMove]);
+  }, [handleMouseMove, isVisible]);
 
   /* ── Lens ring spin on hover ── */
   useEffect(() => {
     let interval;
-    if (hovered) {
+    if (hovered && isVisible) {
       interval = setInterval(() => setLensAngle(a => a + 1.5), 16);
     }
     return () => clearInterval(interval);
-  }, [hovered]);
+  }, [hovered, isVisible]);
 
   /* ── Shutter click ── */
   const handleClick = () => {
@@ -164,8 +185,9 @@ export default function CameraLogo3D({ size = 520 }) {
     setTimeout(() => setShutterOpen(false), 130);
   };
 
-  /* ── Canvas lens shimmer ── */
+  /* ── Viewport-aware Canvas lens shimmer ── */
   useEffect(() => {
+    if (!isVisible) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -241,7 +263,8 @@ export default function CameraLogo3D({ size = 520 }) {
     };
     shimmerRaf = requestAnimationFrame(draw);
     return () => cancelAnimationFrame(shimmerRaf);
-  }, []);
+  }, [isVisible]);
+
 
   const s = size;
 

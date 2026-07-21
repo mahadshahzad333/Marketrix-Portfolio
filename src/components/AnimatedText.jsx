@@ -2,28 +2,29 @@ import React, { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 
 /**
- * AnimatedText — character-by-character scroll-driven opacity animation.
- * Each character transitions from opacity 0.2 → 1 based on scroll progress.
+ * AnimatedText — word-by-word scroll-driven opacity animation.
+ * Optimized to reduce motion scroll listener overhead while delivering
+ * a smooth visual reveal.
  */
 export default function AnimatedText({ text, className = '', style = {} }) {
   const ref = useRef(null);
 
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ['start 0.8', 'end 0.2'],
+    offset: ['start 0.85', 'end 0.25'],
   });
 
-  const chars = text.split('');
+  const words = text.split(' ');
 
   return (
     <p ref={ref} className={className} style={{ position: 'relative', ...style }}>
-      {chars.map((char, i) => {
-        const start = i / chars.length;
-        const end = (i + 1) / chars.length;
+      {words.map((word, i) => {
+        const start = i / words.length;
+        const end = (i + 1) / words.length;
         return (
-          <CharSpan
+          <WordSpan
             key={i}
-            char={char}
+            word={word}
             scrollYProgress={scrollYProgress}
             start={start}
             end={end}
@@ -34,12 +35,11 @@ export default function AnimatedText({ text, className = '', style = {} }) {
   );
 }
 
-function CharSpan({ char, scrollYProgress, start, end }) {
+function WordSpan({ word, scrollYProgress, start, end }) {
   const opacity = useTransform(scrollYProgress, [start, end], [0.2, 1]);
   return (
-    <span style={{ position: 'relative', display: 'inline-block' }}>
-      {/* invisible placeholder to maintain layout */}
-      <span style={{ visibility: 'hidden' }}>{char === ' ' ? '\u00A0' : char}</span>
+    <span style={{ position: 'relative', display: 'inline-block', marginRight: '0.25em' }}>
+      <span style={{ visibility: 'hidden' }}>{word}</span>
       <motion.span
         style={{
           opacity,
@@ -48,8 +48,9 @@ function CharSpan({ char, scrollYProgress, start, end }) {
           top: 0,
         }}
       >
-        {char === ' ' ? '\u00A0' : char}
+        {word}
       </motion.span>
     </span>
   );
 }
+

@@ -206,7 +206,7 @@ function PortraitVideoCard({ url, onClick }) {
       <video
         ref={videoRef}
         src={url}
-        preload="auto"
+        preload="metadata"
         loop
         muted
         playsInline

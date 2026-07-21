@@ -14,22 +14,48 @@ import vid11 from '../assets/videos/marquee_11.mp4';
 import vid12 from '../assets/videos/marquee_12.mp4';
 import vid13 from '../assets/videos/marquee_13.mp4';
 
-const VIDEO_URLS = [vid1, vid2, vid3, vid4, vid5, vid6, vid7, vid8, vid9, vid10, vid11, vid12, vid13];
+import post1 from '../assets/videos/marquee_01.jpg';
+import post2 from '../assets/videos/marquee_02.jpg';
+import post3 from '../assets/videos/marquee_03.jpg';
+import post4 from '../assets/videos/marquee_04.jpg';
+import post5 from '../assets/videos/marquee_05.jpg';
+import post6 from '../assets/videos/marquee_06.jpg';
+import post7 from '../assets/videos/marquee_07.jpg';
+import post8 from '../assets/videos/marquee_08.jpg';
+import post9 from '../assets/videos/marquee_09.jpg';
+import post10 from '../assets/videos/marquee_10.jpg';
+import post11 from '../assets/videos/marquee_11.jpg';
+import post12 from '../assets/videos/marquee_12.jpg';
+import post13 from '../assets/videos/marquee_13.jpg';
 
-const ROW1 = VIDEO_URLS.slice(0, 7);
-const ROW2 = VIDEO_URLS.slice(7);
+const MARQUEE_ITEMS = [
+  { video: vid1, poster: post1 },
+  { video: vid2, poster: post2 },
+  { video: vid3, poster: post3 },
+  { video: vid4, poster: post4 },
+  { video: vid5, poster: post5 },
+  { video: vid6, poster: post6 },
+  { video: vid7, poster: post7 },
+  { video: vid8, poster: post8 },
+  { video: vid9, poster: post9 },
+  { video: vid10, poster: post10 },
+  { video: vid11, poster: post11 },
+  { video: vid12, poster: post12 },
+  { video: vid13, poster: post13 },
+];
 
-const DOUBLE = (arr) => [...arr, ...arr];
+const ROW1 = MARQUEE_ITEMS.slice(0, 7);
+const ROW2 = MARQUEE_ITEMS.slice(7);
 
 // ─── WebKit Mobile Autoplay & Viewport Managed Video Item ───
-function MarqueeVideoItem({ url, className }) {
+function MarqueeVideoItem({ item, className }) {
   const videoRef = useRef(null);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    // Enforce WebKit mobile autoplay requirements programmatically
+    // Mobile Safari & WebKit autoplay compliance
     video.muted = true;
     video.defaultMuted = true;
     video.setAttribute('playsinline', '');
@@ -38,108 +64,100 @@ function MarqueeVideoItem({ url, className }) {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          video.play().catch(() => {});
+          const playPromise = video.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(() => {
+              // Fallback silently if browser policies restrict auto-play
+            });
+          }
         } else {
           video.pause();
         }
       },
-      { rootMargin: '100px', threshold: 0.05 }
+      { rootMargin: '50px', threshold: 0.1 }
     );
 
     observer.observe(video);
     return () => observer.disconnect();
-  }, [url]);
+  }, [item]);
 
   return (
     <video
       ref={videoRef}
-      src={url}
+      src={item.video}
+      poster={item.poster}
       autoPlay
       muted
       loop
       playsInline
-      preload="auto"
+      preload="metadata"
       className={className}
     />
   );
 }
 
 export default function MarqueeSection() {
-  const sectionRef = useRef(null);
-  const row1Ref = useRef(null);
-  const row2Ref = useRef(null);
-
-  useEffect(() => {
-    let animId;
-    const handleScroll = () => {
-      if (!sectionRef.current) return;
-      animId = requestAnimationFrame(() => {
-        const sectionTop = sectionRef.current.getBoundingClientRect().top + window.scrollY;
-        const rawOffset = (window.scrollY - sectionTop + window.innerHeight) * 0.3;
-        if (row1Ref.current) {
-          row1Ref.current.style.transform = `translate3d(${rawOffset - 200}px, 0, 0)`;
-        }
-        if (row2Ref.current) {
-          row2Ref.current.style.transform = `translate3d(${-(rawOffset - 200)}px, 0, 0)`;
-        }
-      });
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      if (animId) cancelAnimationFrame(animId);
-    };
-  }, []);
-
-  const row1Vids = DOUBLE(ROW1);
-  const row2Vids = DOUBLE(ROW2);
-
   const videoClasses =
-    'rounded-3xl object-cover flex-shrink-0 w-[180px] h-[320px] sm:w-[220px] sm:h-[390px] md:w-[260px] md:h-[460px] shadow-2xl shadow-black/50 border border-white/5';
+    'rounded-3xl object-cover flex-shrink-0 w-[180px] h-[320px] sm:w-[220px] sm:h-[390px] md:w-[260px] md:h-[460px] shadow-2xl shadow-black/50 border border-white/5 bg-zinc-900';
 
   return (
     <section
-      ref={sectionRef}
-      className="pt-24 sm:pt-32 md:pt-40 pb-20 overflow-hidden"
+      className="pt-24 sm:pt-32 md:pt-40 pb-20 overflow-hidden relative"
       style={{ background: '#0C0C0C' }}
     >
-      {/* Row 1 — moves RIGHT */}
-      <div
-        ref={row1Ref}
-        style={{
-          willChange: 'transform',
-          transition: 'none',
-        }}
-        className="flex gap-4 sm:gap-6 mb-4 sm:mb-6 mt-10"
-      >
-        {row1Vids.map((url, i) => (
-          <MarqueeVideoItem
-            key={i}
-            url={url}
-            className={videoClasses}
-          />
-        ))}
+      <style>{`
+        @keyframes marquee-scroll-left {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-50%, 0, 0); }
+        }
+        @keyframes marquee-scroll-right {
+          0% { transform: translate3d(-50%, 0, 0); }
+          100% { transform: translate3d(0, 0, 0); }
+        }
+        .animate-marquee-left {
+          display: flex;
+          width: max-content;
+          will-change: transform;
+          animation: marquee-scroll-left 40s linear infinite;
+        }
+        .animate-marquee-right {
+          display: flex;
+          width: max-content;
+          will-change: transform;
+          animation: marquee-scroll-right 40s linear infinite;
+        }
+        .animate-marquee-left:hover,
+        .animate-marquee-right:hover {
+          animation-play-state: paused;
+        }
+      `}</style>
+
+      {/* Row 1 — moves LEFT seamlessly */}
+      <div className="overflow-hidden w-full mt-10 mb-4 sm:mb-6">
+        <div className="animate-marquee-left gap-4 sm:gap-6 flex">
+          {[...ROW1, ...ROW1].map((item, i) => (
+            <MarqueeVideoItem
+              key={`r1-${i}`}
+              item={item}
+              className={videoClasses}
+            />
+          ))}
+        </div>
       </div>
 
-      {/* Row 2 — moves LEFT */}
-      <div
-        ref={row2Ref}
-        style={{
-          willChange: 'transform',
-          transition: 'none',
-        }}
-        className="flex gap-4 sm:gap-6"
-      >
-        {row2Vids.map((url, i) => (
-          <MarqueeVideoItem
-            key={i}
-            url={url}
-            className={videoClasses}
-          />
-        ))}
+      {/* Row 2 — moves RIGHT seamlessly */}
+      <div className="overflow-hidden w-full">
+        <div className="animate-marquee-right gap-4 sm:gap-6 flex">
+          {[...ROW2, ...ROW2].map((item, i) => (
+            <MarqueeVideoItem
+              key={`r2-${i}`}
+              item={item}
+              className={videoClasses}
+            />
+          ))}
+        </div>
       </div>
     </section>
   );
 }
+
