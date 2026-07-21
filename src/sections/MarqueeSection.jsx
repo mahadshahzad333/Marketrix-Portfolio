@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 
 import vid1 from '../assets/videos/marquee_01.mp4';
 import vid2 from '../assets/videos/marquee_02.mp4';
@@ -21,20 +21,53 @@ const ROW2 = VIDEO_URLS.slice(7);
 
 const DOUBLE = (arr) => [...arr, ...arr];
 
+// ─── WebKit Mobile Autoplay & Viewport Managed Video Item ───
+function MarqueeVideoItem({ url, className }) {
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    // Enforce WebKit mobile autoplay requirements programmatically
+    video.muted = true;
+    video.defaultMuted = true;
+    video.setAttribute('playsinline', '');
+    video.setAttribute('webkit-playsinline', '');
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      },
+      { rootMargin: '100px', threshold: 0.05 }
+    );
+
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, [url]);
+
+  return (
+    <video
+      ref={videoRef}
+      src={url}
+      autoPlay
+      muted
+      loop
+      playsInline
+      preload="auto"
+      className={className}
+    />
+  );
+}
+
 export default function MarqueeSection() {
   const sectionRef = useRef(null);
   const row1Ref = useRef(null);
   const row2Ref = useRef(null);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   useEffect(() => {
     let animId;
@@ -60,8 +93,8 @@ export default function MarqueeSection() {
     };
   }, []);
 
-  const row1Vids = isMobile ? ROW1 : DOUBLE(ROW1);
-  const row2Vids = isMobile ? ROW2 : DOUBLE(ROW2);
+  const row1Vids = DOUBLE(ROW1);
+  const row2Vids = DOUBLE(ROW2);
 
   const videoClasses =
     'rounded-3xl object-cover flex-shrink-0 w-[180px] h-[320px] sm:w-[220px] sm:h-[390px] md:w-[260px] md:h-[460px] shadow-2xl shadow-black/50 border border-white/5';
@@ -82,17 +115,11 @@ export default function MarqueeSection() {
         className="flex gap-4 sm:gap-6 mb-4 sm:mb-6 mt-10"
       >
         {row1Vids.map((url, i) => (
-          <video
+          <MarqueeVideoItem
             key={i}
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
+            url={url}
             className={videoClasses}
-          >
-            <source src={url} type="video/mp4" />
-          </video>
+          />
         ))}
       </div>
 
@@ -106,17 +133,11 @@ export default function MarqueeSection() {
         className="flex gap-4 sm:gap-6"
       >
         {row2Vids.map((url, i) => (
-          <video
+          <MarqueeVideoItem
             key={i}
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
+            url={url}
             className={videoClasses}
-          >
-            <source src={url} type="video/mp4" />
-          </video>
+          />
         ))}
       </div>
     </section>

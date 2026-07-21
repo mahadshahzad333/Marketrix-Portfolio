@@ -166,8 +166,26 @@ function PortraitVideoCard({ url, onClick }) {
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+
+    // Enforce WebKit mobile autoplay requirements
+    video.muted = true;
+    video.defaultMuted = true;
+    video.setAttribute('playsinline', '');
+    video.setAttribute('webkit-playsinline', '');
+
     if (isMobile) {
-      video.play().catch(() => {});
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            video.play().catch(() => {});
+          } else {
+            video.pause();
+          }
+        },
+        { rootMargin: '100px', threshold: 0.05 }
+      );
+      observer.observe(video);
+      return () => observer.disconnect();
     } else {
       if (isHovered) {
         video.play().catch(() => {});
@@ -188,11 +206,10 @@ function PortraitVideoCard({ url, onClick }) {
       <video
         ref={videoRef}
         src={url}
-        preload="metadata"
+        preload="auto"
         loop
         muted
         playsInline
-        autoPlay={isMobile}
         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-4 transition-opacity duration-300 group-hover:from-black/95">
