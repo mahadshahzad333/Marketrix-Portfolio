@@ -138,14 +138,14 @@ export default function HeroSection({ startAnimation }) {
       </FadeIn>
 
       {/* ── Bottom Bar ── */}
-      <div className="flex justify-between items-end pb-7 sm:pb-8 md:pb-10 px-6 md:px-10 mt-auto z-30">
+      <div className="flex justify-between items-end pb-14 sm:pb-16 md:pb-10 px-5 sm:px-8 md:px-10 mt-auto z-30">
         {/* Left paragraph */}
         <FadeIn delay={0.5} y={20} trigger={startAnimation} whileInView={false}>
           <p
             className="font-light uppercase tracking-wide leading-snug max-w-[140px] sm:max-w-[220px] md:max-w-[260px]"
             style={{
               color: '#D7E2EA',
-              fontSize: 'clamp(0.7rem, 1.4vw, 1.5rem)',
+              fontSize: 'clamp(0.75rem, 1.4vw, 1.5rem)',
             }}
           >
             elevating brands through creative content
